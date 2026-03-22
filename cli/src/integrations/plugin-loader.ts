@@ -30,6 +30,7 @@ const FIRST_PARTY_PLUGINS: Record<string, string> = {
   "spec-kit": "@sudocode-ai/integration-speckit",
   openspec: "@sudocode-ai/integration-openspec",
   beads: "@sudocode-ai/integration-beads",
+  bmad: "@sudocode-ai/integration-bmad",
 };
 
 /**

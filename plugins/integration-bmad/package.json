@@ -1,0 +1,45 @@
+{
+  "name": "@sudocode-ai/integration-bmad",
+  "version": "0.2.0",
+  "description": "BMAD Method integration for sudocode",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest --run",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "sudocode",
+    "integration",
+    "bmad",
+    "plugin"
+  ],
+  "author": "sudocode-ai",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "chokidar": "^4.0.3",
+    "gray-matter": "^4.0.3",
+    "js-yaml": "^4.1.0"
+  },
+  "peerDependencies": {
+    "@sudocode-ai/types": "^0.2.0"
+  },
+  "devDependencies": {
+    "@sudocode-ai/types": "^0.2.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}
