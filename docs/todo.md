@@ -1,3 +1,5 @@
+> **Note:** This document is from the upstream sudocode repo (author: Alex Ngai). Many of these "missing" items have since been implemented in the current codebase (code change APIs, worktree management UI, pause/resume, execution forking, etc.). Kept as reference for understanding historical priorities.
+
  Execution System Gap Analysis
 
   I've reviewed the current implementation against

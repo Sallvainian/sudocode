@@ -1,33 +1,29 @@
 {
   "workflow_version": "1.2.0",
-  "timestamps": {
-    "started": "2026-03-21T12:00:00Z",
-    "last_updated": "2026-03-21T12:30:00Z",
-    "completed": "2026-03-21T12:30:00Z"
-  },
-  "mode": "initial_scan",
+  "timestamps": {"started": "2026-03-22T10:00:00Z", "last_updated": "2026-03-22T10:45:00Z", "completed": "2026-03-22T10:45:00Z"},
+  "mode": "full_rescan",
   "scan_level": "exhaustive",
   "project_root": "/Users/sallvain/Projects/Tools/sudocode",
   "project_knowledge": "/Users/sallvain/Projects/Tools/sudocode/docs",
   "completed_steps": [
-    {"step": "step_1", "status": "completed", "timestamp": "2026-03-21T12:01:00Z", "summary": "Classified as monorepo with 7 parts (types, cli, mcp, server, frontend, sudocode, plugins)"},
-    {"step": "step_2", "status": "completed", "timestamp": "2026-03-21T12:02:00Z", "summary": "Found 20+ existing docs across packages"},
-    {"step": "step_3", "status": "completed", "timestamp": "2026-03-21T12:03:00Z", "summary": "Tech stack: TypeScript, React 18, Express, SQLite, Vitest"},
-    {"step": "step_4", "status": "completed", "timestamp": "2026-03-21T12:15:00Z", "summary": "Exhaustive scan of all source files across 7 packages. Types fully analyzed (9 files). CLI (65 files), server (80+ files), frontend (100+ files), plugins (4 packages), scripts/CI."},
-    {"step": "step_5", "status": "completed", "timestamp": "2026-03-21T12:18:00Z", "summary": "Source tree documented with 200+ files annotated"},
-    {"step": "step_6", "status": "completed", "timestamp": "2026-03-21T12:20:00Z", "summary": "Dev/deployment guides written with build, test, CI/CD details"},
-    {"step": "step_7", "status": "completed", "timestamp": "2026-03-21T12:22:00Z", "summary": "Integration architecture documented: 5 integration points (imports, child_process, REST+WS, ACP, plugins)"},
-    {"step": "step_8", "status": "completed", "timestamp": "2026-03-21T12:24:00Z", "summary": "Architecture docs written covering system design, storage, execution, workflows"},
-    {"step": "step_9", "status": "completed", "timestamp": "2026-03-21T12:26:00Z", "summary": "9 documentation files generated: index, overview, architecture, source-tree, data-models, api-contracts, component-inventory, integration, dev-guide"},
-    {"step": "step_10", "status": "completed", "timestamp": "2026-03-21T12:28:00Z", "summary": "Master index generated with links to all 9 generated + 9 existing docs"},
-    {"step": "step_11", "status": "completed", "timestamp": "2026-03-21T12:29:00Z", "summary": "Validation complete, all files verified"},
-    {"step": "step_12", "status": "completed", "timestamp": "2026-03-21T12:30:00Z", "summary": "Workflow complete"}
+    {"step": "step_1", "status": "completed", "timestamp": "2026-03-22T10:02:00Z", "summary": "Classified as monorepo with 7 parts (types, cli, mcp, server, frontend, sudocode, plugins/5)"},
+    {"step": "step_2", "status": "completed", "timestamp": "2026-03-22T10:04:00Z", "summary": "Found 25+ existing docs across packages + review/ directory with BMAD review findings"},
+    {"step": "step_3", "status": "completed", "timestamp": "2026-03-22T10:06:00Z", "summary": "Tech stack: TypeScript 5.3+, Node.js 18+, React 18, Express 4.18, SQLite, Vitest 3.2, Vite 6.4"},
+    {"step": "step_4", "status": "completed", "timestamp": "2026-03-22T10:25:00Z", "summary": "Exhaustive scan of all 350+ source files across 7 packages via 6 parallel agents. Types (9 files, 11 tables, 5 migrations), CLI (50+ files, 27 commands, CRUD+sync+merge), MCP (12 files, 32 tools, 11 scopes), Server (70+ files, 80+ endpoints, execution engine, workflows), Frontend (140+ files, 100+ components, 37+ hooks, 14 pages), Plugins (55+ files, 5 integrations, 9 BMAD personas)"},
+    {"step": "step_5", "status": "completed", "timestamp": "2026-03-22T10:28:00Z", "summary": "Source tree documented with 350+ files annotated across all packages"},
+    {"step": "step_6", "status": "completed", "timestamp": "2026-03-22T10:32:00Z", "summary": "Dev guide written with build, test, CI/CD, SEA packaging, code style details"},
+    {"step": "step_7", "status": "completed", "timestamp": "2026-03-22T10:34:00Z", "summary": "Integration architecture documented: 5 integration points, 5 plugins, BMAD 4-layer integration, known issues"},
+    {"step": "step_8", "status": "completed", "timestamp": "2026-03-22T10:38:00Z", "summary": "Architecture doc written with system design, storage, execution engine, workflows, BMAD, known issues (722 lines)"},
+    {"step": "step_9", "status": "completed", "timestamp": "2026-03-22T10:42:00Z", "summary": "9 documentation files generated: index, overview, architecture, source-tree, data-models, api-contracts, component-inventory, integration, dev-guide"},
+    {"step": "step_10", "status": "completed", "timestamp": "2026-03-22T10:43:00Z", "summary": "Master index generated with links to all 9 generated + 9 existing docs + review findings + external docs reference"},
+    {"step": "step_11", "status": "completed", "timestamp": "2026-03-22T10:44:00Z", "summary": "Validation complete: all 9 files verified (3,674 total lines), no incomplete markers found"},
+    {"step": "step_12", "status": "completed", "timestamp": "2026-03-22T10:45:00Z", "summary": "Workflow complete"}
   ],
   "current_step": "completed",
   "findings": {
-    "project_classification": "Monorepo (npm workspaces), 7 parts, TypeScript",
-    "technology_stack": "TypeScript on Node.js 18+, React 18 frontend, Express backend, SQLite storage",
-    "architecture": "Layered monorepo with shared types, CLI operations, server API, React SPA"
+    "project_classification": "Monorepo (npm workspaces), 7 parts + 5 plugins, TypeScript",
+    "technology_stack": "TypeScript 5.3+ on Node.js 18+, React 18 frontend, Express 4.18 backend, SQLite storage, Vitest 3.2 testing",
+    "architecture": "Layered monorepo with shared types, CLI operations, MCP server (32 tools), Express REST API (80+ endpoints), React SPA (100+ components), 5 integration plugins, BMAD methodology support"
   },
   "project_types": [
     {"part_id": "types", "project_type_id": "library", "display_name": "Shared TypeScript Types"},
@@ -36,7 +32,7 @@
     {"part_id": "server", "project_type_id": "backend", "display_name": "Local Backend Server"},
     {"part_id": "frontend", "project_type_id": "web", "display_name": "React Frontend"},
     {"part_id": "sudocode", "project_type_id": "library", "display_name": "Meta-package"},
-    {"part_id": "plugins", "project_type_id": "library", "display_name": "Integration Plugins"}
+    {"part_id": "plugins", "project_type_id": "library", "display_name": "Integration Plugins (5)"}
   ],
   "outputs_generated": [
     "project-scan-report.json",

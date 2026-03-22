@@ -1,270 +1,275 @@
-# Source Tree Analysis
+# sudocode — Source Tree Analysis
 
-> Generated: 2026-03-21 | Scan Level: Exhaustive
+> Generated: 2026-03-22 | Scan Level: Exhaustive | Mode: Full Rescan
 
 ## Repository Structure
 
-sudocode is an npm workspaces monorepo with 7 packages and 4 plugins.
-
 ```
-sudocode/
-├── types/                          # @sudocode-ai/types — Shared TypeScript definitions
-│   └── src/
-│       ├── index.d.ts              # Core entities: Spec, Issue, Execution, Feedback, Relationship
-│       ├── agents.d.ts             # Agent configs: ClaudeCode, Codex, Copilot, Cursor, Gemini, Opencode
-│       ├── artifacts.d.ts          # Execution artifacts: FileChangeStat, ChangesSnapshot
-│       ├── events.d.ts             # Watcher events: EntitySyncEvent, FileChangeEvent
-│       ├── integrations.d.ts       # Plugin system: IntegrationPlugin, IntegrationProvider
-│       ├── voice.d.ts              # Voice/STT/TTS types and streaming messages
-│       ├── workflows.d.ts          # Multi-issue workflows: Workflow, WorkflowStep, orchestration
-│       ├── schema.ts               # SQLite schema definitions (11 tables, views, indexes)
-│       └── migrations.ts           # Database migrations (v1-v5)
+sudocode/                          # Monorepo root (npm workspaces)
+├── package.json                   # Workspace config, build/test/dev scripts
+├── vitest.config.ts               # Root test config
+├── CONTRIBUTING.md                # Setup, build, test instructions
+├── LICENSE                        # Apache-2.0
+├── README.md                      # Project overview and documentation
 │
-├── cli/                            # @sudocode-ai/cli — Core CLI operations
+├── types/                         # @sudocode-ai/types — Shared TypeScript definitions
+│   ├── package.json               # Type-only package, exports .d.ts files
 │   └── src/
-│       ├── cli.ts                  # Entry point — Commander.js program setup
-│       ├── index.ts                # Library exports for programmatic use
-│       ├── cli/                    # Command registrations
-│       │   ├── spec-commands.ts    # sudocode spec create|list|show|update
-│       │   ├── issue-commands.ts   # sudocode issue create|list|show|update|close
-│       │   ├── relationship-commands.ts  # sudocode link <from> <to>
-│       │   ├── feedback-commands.ts      # sudocode feedback add
-│       │   ├── sync-commands.ts    # sudocode sync [--watch]
-│       │   ├── config-commands.ts  # sudocode config get|set|show
-│       │   ├── status-commands.ts  # sudocode ready, sudocode status
-│       │   ├── init-commands.ts    # sudocode init
-│       │   ├── server-commands.ts  # sudocode server start
-│       │   ├── query-commands.ts   # sudocode query (SQL queries)
-│       │   ├── merge-commands.ts   # sudocode merge (JSONL conflict resolution)
-│       │   ├── reference-commands.ts  # sudocode ref (cross-references)
-│       │   ├── plugin-commands.ts  # sudocode plugin test|config|sync
-│       │   ├── remote-commands.ts  # sudocode remote (Codespaces deploy)
-│       │   ├── auth-commands.ts    # sudocode auth login|status|clear
-│       │   └── update-commands.ts  # sudocode update
-│       ├── operations/             # CRUD operations layer
-│       │   ├── specs.ts            # Spec CRUD (create, list, get, update, delete, archive)
-│       │   ├── issues.ts           # Issue CRUD + status transitions
-│       │   ├── relationships.ts    # Relationship management (blocks, implements, etc.)
-│       │   ├── feedback.ts         # Anchored feedback operations
-│       │   ├── feedback-anchors.ts # Anchor relocation algorithm
-│       │   ├── events.ts           # Event logging
-│       │   ├── tags.ts             # Tag management
-│       │   ├── references.ts       # Cross-reference extraction
-│       │   ├── external-links.ts   # External system link management
-│       │   └── transactions.ts     # Transaction support
-│       ├── integrations/           # Plugin integration framework
-│       │   ├── registry.ts         # Plugin registry
-│       │   ├── plugin-loader.ts    # Dynamic plugin loading
+│       ├── index.d.ts             # Core: Spec, Issue, Relationship, Feedback, Execution, Config
+│       ├── agents.d.ts            # Agent configs: ClaudeCode, Codex, Copilot, Cursor, Gemini, Opencode
+│       ├── artifacts.d.ts         # FileChangeStat, ChangesSnapshot, ExecutionChangesResult
+│       ├── events.d.ts            # EntitySyncEvent, FileChangeEvent
+│       ├── integrations.d.ts      # IntegrationPlugin, IntegrationProvider, ExternalEntity, SyncResult
+│       ├── voice.d.ts             # STT/TTS providers, VoiceSettings, NarrationEvent
+│       ├── workflows.d.ts         # WorkflowConfig, WorkflowStep, WorkflowSource, escalation types
+│       ├── schema.ts              # SQLite table/index/view definitions (11 tables)
+│       └── migrations.ts          # 5 database migrations with up/down functions
+│
+├── cli/                           # @sudocode-ai/cli — Core operations & CLI
+│   ├── package.json               # commander, better-sqlite3, chokidar, gray-matter
+│   ├── README.md                  # CLI documentation
+│   └── src/
+│       ├── cli.ts                 # ⚡ Entry point — Commander.js program setup
+│       ├── index.ts               # Public API exports
+│       ├── db.ts                  # SQLite initialization with WAL mode
+│       ├── config.ts              # Config loading (project + local, split files)
+│       ├── jsonl.ts               # JSONL read/write with atomic operations
+│       ├── markdown.ts            # Frontmatter parsing, cross-reference extraction
+│       ├── export.ts              # SQLite → JSONL export with debouncing
+│       ├── import.ts              # JSONL → SQLite import with UUID dedup
+│       ├── sync.ts                # Bidirectional markdown ↔ JSONL ↔ SQLite sync
+│       ├── watcher.ts             # File system watcher for auto-sync
+│       ├── merge-resolver.ts      # UUID-based JSONL conflict resolution
+│       ├── git-merge.ts           # Git merge-file wrapper for 3-way merge
+│       ├── yaml-conflict-resolver.ts  # YAML-specific conflict handling
+│       ├── yaml-converter.ts      # Entity ↔ YAML serialization
+│       ├── id-generator.ts        # Hash-based IDs (s-xxxx, i-xxxx) + UUID
+│       ├── filename-generator.ts  # Unique markdown filename generation
+│       ├── validation.ts          # Runtime type validators
+│       ├── telemetry.ts           # Usage tracking
+│       ├── update-checker.ts      # CLI update notifications
+│       │
+│       ├── operations/            # Database CRUD operations
+│       │   ├── specs.ts           # Spec create/read/update/delete/list/search
+│       │   ├── issues.ts          # Issue CRUD + status transitions + ready/blocked
+│       │   ├── relationships.ts   # Add/remove relationships, auto-blocked status
+│       │   ├── feedback.ts        # Feedback CRUD with anchor support
+│       │   ├── feedback-anchors.ts # Anchor creation with auto-relocation algorithm
+│       │   ├── tags.ts            # Tag add/remove/list/setTags
+│       │   ├── references.ts      # Cross-reference formatting [[id]]
+│       │   ├── external-links.ts  # External link CRUD for integrations
+│       │   ├── transactions.ts    # Transaction wrapper with retry logic
+│       │   └── events.ts          # Event log operations
+│       │
+│       ├── integrations/          # Plugin system & sync coordination
+│       │   ├── types.ts           # IntegrationProvider interface, ProviderRegistry
+│       │   ├── base-provider.ts   # Abstract BaseIntegrationProvider
+│       │   ├── plugin-loader.ts   # Dynamic plugin loading (npm/local)
+│       │   ├── registry.ts        # DefaultProviderRegistry
 │       │   ├── sync-coordinator.ts # Bidirectional sync orchestration
-│       │   ├── base-provider.ts    # Base provider implementation
-│       │   ├── config-resolver.ts  # Config resolution
-│       │   ├── config-validator.ts # Config validation
-│       │   └── utils/
-│       │       └── conflict-resolver.ts  # Sync conflict resolution
-│       ├── remote/                 # Remote environment support
-│       │   ├── spawn-service.ts    # Codespaces spawn service
-│       │   ├── git-context.ts      # Git context detection
-│       │   └── config.ts           # Remote configuration
-│       ├── auth/                   # Authentication
-│       │   ├── credentials.ts      # Credential management (fnox-based)
-│       │   ├── claude.ts           # Claude API auth
-│       │   └── status.ts           # Auth status reporting
-│       ├── db.ts                   # SQLite database initialization + migrations
-│       ├── jsonl.ts                # JSONL read/write (atomic via temp+rename)
-│       ├── markdown.ts             # Markdown parsing (frontmatter, cross-refs)
-│       ├── sync.ts                 # JSONL ↔ SQLite ↔ Markdown sync engine
-│       ├── watcher.ts              # Chokidar file watcher for auto-sync
-│       ├── config.ts               # Config management (project + local)
-│       ├── id-generator.ts         # Hash-based ID generation (s-xxxx, i-xxxx)
-│       ├── git-merge.ts            # JSONL git merge driver
-│       ├── merge-resolver.ts       # Merge conflict resolver
-│       ├── telemetry.ts            # OpenTelemetry instrumentation
-│       ├── export.ts               # SQLite → JSONL export
-│       ├── import.ts               # JSONL → SQLite import
-│       └── validation.ts           # Input validation utilities
+│       │   ├── config-validator.ts # Integration config validation
+│       │   └── config-resolver.ts # Config path resolution
+│       │
+│       ├── cli/                   # CLI command handlers (15 modules)
+│       │   ├── spec-commands.ts   # spec create/list/show/update/delete/add-ref
+│       │   ├── issue-commands.ts  # issue create/list/show/update/close/delete
+│       │   ├── relationship-commands.ts # link command
+│       │   ├── feedback-commands.ts # feedback add/list/show/dismiss/stale/relocate
+│       │   ├── sync-commands.ts   # sync/export/import
+│       │   ├── query-commands.ts  # ready/blocked
+│       │   ├── status-commands.ts # status/stats
+│       │   ├── config-commands.ts # config get/set/show
+│       │   ├── init-commands.ts   # init project
+│       │   ├── server-commands.ts # start local server
+│       │   ├── plugin-commands.ts # plugin list/install/configure/test
+│       │   ├── merge-commands.ts  # resolve-conflicts/merge-driver
+│       │   ├── auth-commands.ts   # auth claude/status/clear
+│       │   ├── update-commands.ts # update/check/dismiss
+│       │   └── remote-commands.ts # remote codespaces spawn/config/list
+│       │
+│       ├── auth/                  # Authentication (OAuth, credentials)
+│       └── remote/               # Remote deployment (Codespaces)
 │
-├── mcp/                            # @sudocode-ai/mcp — MCP Server
+├── mcp/                           # @sudocode-ai/mcp — MCP server for AI agents
+│   ├── package.json               # @modelcontextprotocol/sdk
+│   ├── README.md                  # MCP tool documentation
 │   └── src/
-│       ├── index.ts                # Entry point — stdio MCP server
-│       ├── server.ts               # Tool definitions (ready, list_issues, show_issue, etc.)
-│       └── tools/                  # Individual tool implementations
+│       ├── index.ts               # ⚡ Entry point — arg parsing, validation
+│       ├── server.ts              # SudocodeMCPServer — tool routing (CLI vs API)
+│       ├── scopes.ts              # Scope system: 11 scopes, meta-scopes, tool filtering
+│       ├── tool-registry.ts       # 53 tool definitions with JSON schemas
+│       ├── api-client.ts          # SudocodeAPIClient — HTTP client for server
+│       ├── client.ts              # SudocodeClient — CLI subprocess wrapper
+│       ├── types.ts               # MCP type definitions
+│       └── tools/                 # CLI-wrapped tool implementations
+│           ├── issues.ts          # ready, list/show/upsert issues
+│           ├── specs.ts           # list/show/upsert specs
+│           ├── relationships.ts   # link
+│           ├── feedback.ts        # add_feedback
+│           └── references.ts      # add_reference
 │
-├── server/                         # @sudocode-ai/local-server — Backend API
+├── server/                        # @sudocode-ai/local-server — Express REST + WebSocket
+│   ├── package.json               # express, ws, better-sqlite3, zod, ACP SDKs
 │   └── src/
-│       ├── index.ts                # Express app setup, middleware, WebSocket
-│       ├── cli.ts                  # Server CLI entry point
-│       ├── routes/                 # REST API routes
-│       │   ├── executions.ts       # /api/executions — execution lifecycle
-│       │   ├── issues.ts           # /api/issues — issue CRUD
-│       │   ├── workflows.ts        # /api/workflows — workflow management
-│       │   ├── agents.ts           # /api/agents — agent discovery
-│       │   ├── feedback.ts         # /api/feedback — feedback operations
-│       │   ├── relationships.ts    # /api/relationships — entity relationships
-│       │   ├── voice.ts            # /api/voice — STT/TTS endpoints
-│       │   ├── config.ts           # /api/config — configuration
-│       │   ├── import.ts           # /api/import — external entity import
-│       │   ├── plugins.ts          # /api/plugins — integration management
-│       │   ├── projects.ts         # /api/projects — multi-project support
-│       │   ├── editors.ts          # /api/editors — IDE integration
-│       │   ├── files.ts            # /api/files — file search
-│       │   ├── repo-info.ts        # /api/repo-info — git repository info
-│       │   ├── version.ts          # /api/version — version info
-│       │   └── update.ts           # /api/update — update check
-│       ├── services/               # Business logic layer
-│       │   ├── execution-service.ts       # Execution orchestration
-│       │   ├── execution-lifecycle.ts     # Execution state machine
-│       │   ├── execution-changes-service.ts  # Code change tracking (diffs)
-│       │   ├── execution-logs-store.ts    # Log storage (NDJSON)
-│       │   ├── execution-worker-pool.ts   # Worker pool for parallel execution
-│       │   ├── worktree-sync-service.ts   # Worktree → main sync (squash/preserve/stage)
-│       │   ├── agent-registry.ts          # Agent executable discovery (24h cache)
-│       │   ├── websocket.ts               # WebSocket manager (real-time events)
-│       │   ├── watcher.ts                 # File watcher integration
-│       │   ├── project-manager.ts         # Multi-project management
-│       │   ├── project-registry.ts        # Project registry
-│       │   ├── integration-sync-service.ts  # Integration sync orchestration
-│       │   ├── external-refresh-service.ts  # External link refresh
-│       │   ├── narration-service.ts       # Voice narration event generation
-│       │   ├── stt-service.ts             # Speech-to-text service
-│       │   ├── tts-service.ts             # Text-to-speech service
-│       │   ├── prompt-resolver.ts         # Prompt template resolution
-│       │   ├── prompt-template-engine.ts  # Template variable interpolation
-│       │   ├── editor-service.ts          # IDE editor launching
-│       │   ├── version-service.ts         # Version checking
-│       │   ├── db.ts                      # Database service
-│       │   └── file-search/               # File search strategies
-│       ├── execution/              # Execution engine
-│       │   ├── adapters/           # Agent adapters (ACP-based)
-│       │   └── worktree/           # Worktree management
-│       │       ├── manager.ts      # Worktree create/delete/list
-│       │       ├── conflict-detector.ts  # Merge conflict detection
-│       │       └── git-sync-cli.ts # Git sync operations
-│       ├── workflow/               # Workflow orchestration
-│       │   ├── engines/
-│       │   │   ├── sequential-engine.ts    # Sequential step execution
-│       │   │   └── orchestrator-engine.ts  # AI-driven orchestration
-│       │   ├── mcp/                        # Workflow MCP server
-│       │   │   ├── server.ts               # MCP tools for orchestrator
-│       │   │   └── tools/                  # Escalation, execution, workflow tools
-│       │   ├── dependency-analyzer.ts      # DAG dependency analysis
-│       │   └── services/
-│       │       ├── prompt-builder.ts       # Orchestrator prompt construction
-│       │       └── wakeup-service.ts       # Event-driven orchestrator wakeup
-│       ├── workers/                # Worker threads
-│       │   ├── execution-worker.ts # Agent process spawning
-│       │   └── worker-ipc.ts       # IPC communication
-│       └── middleware/
-│           └── project-context.ts  # Request-scoped project context
+│       ├── index.ts               # ⚡ Entry point — Express app, WebSocket, startup
+│       ├── cli.ts                 # Server CLI with commander
+│       │
+│       ├── routes/                # Express route handlers (18 routers)
+│       │   ├── issues.ts          # GET/POST/PATCH/DELETE /api/issues
+│       │   ├── specs.ts           # GET/POST/PATCH/DELETE /api/specs
+│       │   ├── relationships.ts   # GET/POST/DELETE /api/relationships
+│       │   ├── feedback.ts        # GET/POST/PATCH/DELETE /api/feedback
+│       │   ├── executions.ts      # Execution CRUD + stream + sync + changes
+│       │   ├── workflows.ts       # Workflow CRUD + lifecycle control
+│       │   ├── agents.ts          # Agent discovery and verification
+│       │   ├── bmad.ts            # BMAD status/agents/artifacts/execute/gate/workflow
+│       │   ├── projects.ts        # Project listing/browsing/opening
+│       │   ├── config.ts          # Config read/write
+│       │   ├── plugins.ts         # Plugin management
+│       │   ├── import.ts          # On-demand entity import
+│       │   ├── editors.ts         # Open in IDE
+│       │   ├── files.ts           # File search
+│       │   ├── voice.ts           # Transcription endpoint
+│       │   ├── repo-info.ts       # Git repository info
+│       │   ├── version.ts         # Version info
+│       │   └── update.ts          # Update management
+│       │
+│       ├── services/              # Business logic (20+ services)
+│       │   ├── execution-service.ts       # Execution lifecycle management
+│       │   ├── execution-lifecycle.ts     # Worktree creation/cleanup
+│       │   ├── execution-changes-service.ts # File change tracking
+│       │   ├── worktree-sync-service.ts   # Sync: squash/preserve/stage
+│       │   ├── agent-registry.ts          # Agent discovery (6 types, 24h cache)
+│       │   ├── bmad-execution-service.ts  # BMAD persona-based execution
+│       │   ├── bmad-gate-service.ts       # Quality gates (pass/concerns/fail)
+│       │   ├── bmad-workflow-service.ts   # 4-phase workflow generation
+│       │   ├── websocket.ts               # WebSocket broadcast + subscriptions
+│       │   ├── project-registry.ts        # Multi-project registry
+│       │   ├── project-manager.ts         # Project lifecycle
+│       │   ├── project-context.ts         # Per-project service container
+│       │   └── [entity services, STT/TTS]
+│       │
+│       ├── execution/             # Execution engine
+│       │   ├── adapters/          # Agent adapters (claude, codex, copilot, cursor)
+│       │   ├── executors/         # ACP + legacy executor wrappers
+│       │   ├── output/            # Session update coalescing
+│       │   └── worktree/          # Git worktree management
+│       │
+│       └── workflow/              # Workflow orchestration
+│           ├── engines/
+│           │   ├── sequential-engine.ts     # Linear step execution
+│           │   └── orchestrator-engine.ts   # AI-managed dynamic execution
+│           └── mcp/               # Workflow MCP server (subprocess)
 │
-├── frontend/                       # @sudocode-ai/local-ui — React SPA
+├── frontend/                      # @sudocode-ai/local-ui — React SPA
+│   ├── package.json               # React 18, Vite, TailwindCSS, Radix, TanStack Query
+│   ├── vite.config.ts
+│   ├── tailwind.config.js
+│   ├── index.html
 │   └── src/
-│       ├── App.tsx                 # Root — React Router, QueryClient, WebSocket
-│       ├── main.tsx                # Vite entry point
-│       ├── pages/                  # Route-based pages
-│       │   ├── ExecutionsPage.tsx   # Multi-execution grid view
-│       │   ├── ExecutionDetailPage.tsx  # Single execution detail
-│       │   ├── WorktreesPage.tsx   # Worktree management
-│       │   ├── IssuesPage.tsx      # Issues list + detail
-│       │   ├── SpecsPage.tsx       # Specs list + detail
-│       │   ├── WorkflowsPage.tsx   # Workflow management + DAG
-│       │   ├── ArchivedIssuesPage.tsx  # Archived issues
-│       │   └── ProjectsPage.tsx    # Multi-project management
-│       ├── components/             # Feature-organized components
-│       │   ├── executions/         # ~30 components (grid, monitor, diff, agent config)
-│       │   ├── issues/             # Issue cards, editor, Kanban board
-│       │   ├── workflows/          # Workflow DAG, controls, escalation
-│       │   ├── worktrees/          # Worktree cards, detail panel
-│       │   ├── import/             # External entity import UI
-│       │   ├── relationships/      # Relationship management UI
-│       │   ├── entities/           # Entity badges, hover cards
-│       │   ├── chat-widget/        # Floating chat widget
-│       │   ├── voice/              # Voice input/narration UI
-│       │   ├── layout/             # Sidebar, settings, help
-│       │   ├── projects/           # Project switcher
-│       │   ├── routing/            # Route guards
-│       │   └── ui/                 # shadcn/ui primitives (Radix-based)
-│       ├── hooks/                  # Custom React hooks
-│       │   ├── useExecutions.ts    # Execution fetching (React Query + WS)
-│       │   ├── useExecutionChanges.ts  # File change tracking
-│       │   ├── useExecutionSync.ts # Sync operations
-│       │   ├── useExecutionLogs.ts # Real-time log streaming
-│       │   ├── useAgents.ts        # Agent discovery
-│       │   ├── useWorktrees.ts     # Worktree management
-│       │   ├── useWorkflows.ts     # Workflow operations
-│       │   └── ...                 # ~20 more hooks
-│       ├── contexts/               # React contexts
-│       │   ├── WebSocketContext.tsx # Real-time WebSocket subscription
-│       │   ├── ProjectContext.tsx   # Current project state
-│       │   ├── ThemeContext.tsx     # Dark/light theme
-│       │   └── ChatWidgetContext.tsx  # Chat widget state
-│       ├── stores/                 # Zustand stores
-│       │   └── ...                 # State management
-│       └── lib/                    # Utilities
-│           ├── api.ts              # Axios API client
-│           └── utils.ts            # cn() helper, etc.
+│       ├── main.tsx               # ⚡ Entry point — React DOM render
+│       ├── App.tsx                # Router, providers, 14+ route definitions
+│       │
+│       ├── pages/                 # Route-based pages (14 pages)
+│       │   ├── IssuesPage.tsx     # Kanban board with drag-and-drop
+│       │   ├── SpecsPage.tsx      # Spec list with import
+│       │   ├── ExecutionsPage.tsx  # Multi-chain grid view
+│       │   ├── WorkflowsPage.tsx  # Workflow list + DAG detail
+│       │   ├── WorktreesPage.tsx  # Worktree management
+│       │   ├── BmadDashboardPage.tsx  # BMAD phase tracker + artifacts
+│       │   ├── BmadPipelinePage.tsx   # BMAD DAG pipeline visualization
+│       │   ├── BmadSprintPage.tsx     # BMAD sprint kanban board
+│       │   └── [detail pages, archived pages, projects]
+│       │
+│       ├── components/            # React components (100+)
+│       │   ├── executions/        # Execution display (40+ files)
+│       │   ├── issues/            # Issue kanban, cards, panels
+│       │   ├── specs/             # Spec editor (Tiptap), viewer, feedback
+│       │   ├── workflows/         # Workflow DAG (React Flow + dagre)
+│       │   ├── bmad/              # BMAD components (18 files)
+│       │   ├── chat-widget/       # Chat assistant widget
+│       │   ├── import/            # Entity import flow
+│       │   ├── entities/          # Entity badges, hover cards
+│       │   ├── layout/            # MainLayout, Sidebar
+│       │   ├── ui/                # shadcn/ui primitives (Radix-based)
+│       │   └── voice/             # Voice input/output
+│       │
+│       ├── hooks/                 # Custom React hooks (37+)
+│       ├── contexts/              # React Contexts (4)
+│       │   ├── ProjectContext.tsx  # Multi-project context
+│       │   ├── WebSocketContext.tsx # Real-time subscriptions
+│       │   ├── ThemeContext.tsx    # Light/dark + 9 color themes
+│       │   └── ChatWidgetContext.tsx # Chat widget state
+│       ├── lib/                   # Client libraries (API, WebSocket, TTS)
+│       ├── types/                 # Frontend type definitions
+│       ├── themes/                # 9 color theme definitions
+│       └── utils/                 # Utility functions
 │
-├── sudocode/                       # Meta-package — bundles all packages
-│   └── package.json                # Dependencies on all @sudocode-ai/* packages
+├── sudocode/                      # Meta-package — bundles all for npm install
 │
-├── plugins/                        # Integration plugins
-│   ├── integration-github/         # GitHub integration (gh CLI)
-│   ├── integration-beads/          # Beads integration
-│   ├── integration-openspec/       # OpenSpec integration
-│   └── integration-speckit/        # SpecKit integration
+├── plugins/                       # Integration plugins (5)
+│   ├── integration-bmad/          # BMAD Method (9 personas, 4-phase pipeline)
+│   │   └── src/
+│   │       ├── plugin.ts          # BmadPlugin + BmadProvider
+│   │       ├── entity-mapper.ts   # Artifacts → specs, epics/stories → issues
+│   │       ├── id-generator.ts    # Deterministic IDs (bm-prd, bme-N, bms-N-M)
+│   │       ├── relationship-mapper.ts # Hierarchy relationships
+│   │       ├── watcher.ts         # Content-hashing file watcher
+│   │       ├── persona-prompts.ts # 9 persona system prompts
+│   │       ├── parser/            # PRD, architecture, epic, story, sprint parsers
+│   │       └── writer/            # Sprint-status + story write-back
+│   ├── integration-beads/         # Beads (JSONL-based, bidirectional)
+│   ├── integration-github/        # GitHub Issues (read-only, on-demand import)
+│   ├── integration-openspec/      # OpenSpec (file-based, bidirectional)
+│   └── integration-speckit/       # Spec-Kit (file-based, bidirectional)
 │
-├── build-scripts/                  # SEA (Single Executable Application) builds
-│   ├── esbuild-cli.js             # Bundle CLI for SEA
-│   ├── esbuild-mcp.js            # Bundle MCP for SEA
-│   ├── esbuild-server.js          # Bundle server for SEA
-│   └── package-sea.js             # Node.js SEA packaging
+├── build-scripts/                 # SEA binary packaging
+│   ├── esbuild-cli.js             # CLI bundle
+│   ├── esbuild-mcp.js             # MCP bundle
+│   ├── esbuild-server.js          # Server bundle + frontend assets
+│   └── package-sea.js             # Multi-platform packaging (6 targets)
 │
-├── scripts/                        # Development scripts
-│   ├── link.sh                    # npm link for local development
-│   ├── version.sh                 # Version bumping
-│   ├── publish.sh                 # NPM publishing
-│   └── sync-dependencies.js       # Dependency version sync
+├── scripts/                       # Deployment scripts
+│   ├── publish.sh                 # NPM publish pipeline
+│   ├── install.sh                 # XDG-compliant installer
+│   ├── link.sh                    # Local dev linking
+│   └── sync-dependencies.js       # Meta-package dep sync
 │
-├── .github/workflows/              # CI/CD
-│   ├── test.yml                   # Test pipeline
-│   ├── publish.yml                # NPM publish pipeline
-│   ├── build-binaries.yml         # SEA binary builds
-│   └── version_test.yml           # Version consistency checks
+├── .github/workflows/             # CI/CD
+│   ├── test.yml                   # PR validation (Node 22)
+│   ├── publish.yml                # NPM publish with provenance
+│   ├── build-binaries.yml         # SEA builds (6 platforms + integration tests)
+│   └── version_test.yml           # Version consistency
 │
-├── .sudocode/                      # Self-hosting (sudocode manages itself)
-│   ├── specs/                     # Spec markdown files
-│   ├── issues/                    # Issue markdown files
-│   ├── specs.jsonl                # Spec data (git-tracked)
-│   ├── issues.jsonl               # Issue data (git-tracked)
-│   └── config.json                # Project config
-│
-├── docs/                           # Documentation (this directory)
-├── package.json                    # Root workspace config
-├── CONTRIBUTING.md                 # Contribution guidelines
-└── LICENSE                         # Apache-2.0
+├── .sudocode/                     # Self-hosted project data
+├── docs/                          # Generated + hand-written documentation
+└── review/                        # BMAD integration review (5 critical issues)
 ```
 
-## Critical Entry Points
+## File Count Summary
 
-| Package | Entry Point | Purpose |
-|---------|------------|---------|
-| **cli** | `cli/src/cli.ts` | CLI binary (`sudocode` / `sdc`) |
-| **cli** | `cli/src/index.ts` | Programmatic API for other packages |
-| **mcp** | `mcp/src/index.ts` | MCP stdio server (`sudocode-mcp`) |
-| **server** | `server/src/cli.ts` | Server binary (`sudocode-server`) |
-| **server** | `server/src/index.ts` | Express app factory |
-| **frontend** | `frontend/src/main.tsx` | Vite SPA entry |
+| Package | Source Files | Purpose |
+|---------|-------------|---------|
+| types | 9 | Shared TypeScript definitions |
+| cli | 50+ | CLI commands, CRUD operations, sync, merge |
+| mcp | 12 | MCP server, 53 tools, scope system |
+| server | 70+ | REST API, execution engine, workflows |
+| frontend | 140+ | React SPA, 100+ components, 37+ hooks |
+| plugins (5) | 55+ | Integration plugins |
+| build/scripts | 8 | SEA packaging, CI/CD |
+| **Total** | **350+** | |
 
-## Package Dependency Graph
+## Critical Directories
 
-```
-types (standalone)
-  ↓
-cli (depends on types)
-  ↓         ↓
-mcp        server (both depend on cli + types)
-            ↓
-          frontend (independent, talks to server via REST/WS)
-
-plugins/* (peer-depend on types)
-sudocode (meta: bundles all)
-```
+| Directory | Purpose |
+|-----------|---------|
+| `types/src/` | All shared interfaces — start here to understand the data model |
+| `cli/src/operations/` | Database CRUD — the canonical data access layer |
+| `cli/src/integrations/` | Plugin system — how external tools integrate |
+| `server/src/routes/` | REST API — all HTTP endpoints |
+| `server/src/services/` | Business logic — execution, sync, workflows |
+| `server/src/execution/` | Execution engine — agent adapters, worktree isolation |
+| `server/src/workflow/` | Workflow orchestration — sequential + AI-managed |
+| `frontend/src/pages/` | UI pages — feature inventory |
+| `frontend/src/hooks/` | Data hooks — client-server interaction patterns |
+| `plugins/integration-bmad/` | BMAD integration — methodology support with personas |

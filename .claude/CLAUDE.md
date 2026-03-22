@@ -1,5 +1,7 @@
 # sudocode Repository Guide for AI Coding Agents
 
+**Note:** This is a fork of sudocode called **pseudocode**. The codebase still uses the name "sudocode" everywhere — do not rename it. When you see "sudocode" in code, docs, or package names, it refers to this project (pseudocode). The fork adds native BMAD Method integration as a first-class feature.
+
 ## Project Overview
 
 **sudocode** is a git-native context management system for AI-assisted software development. It provides a 4-tiered abstraction structure:
