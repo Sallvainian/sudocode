@@ -9,3 +9,6 @@ dist/
 .sudocode/deploy-config.json
 .cursor
 __pycache__/
+_bmad/
+.agents/
+.claude/skills/
