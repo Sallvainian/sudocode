@@ -145,17 +145,25 @@ export function createProjectsRouter(
             const entryPath = path.join(currentPath, d.name);
             // Check if this directory has a .sudocode folder
             let hasSudocode = false;
+            let hasBmad = false;
             try {
               await fs.access(path.join(entryPath, ".sudocode"));
               hasSudocode = true;
             } catch {
               // No .sudocode directory
             }
+            try {
+              await fs.access(path.join(entryPath, "_bmad"));
+              hasBmad = true;
+            } catch {
+              // No _bmad directory
+            }
             return {
               name: d.name,
               path: entryPath,
               isDirectory: true,
               hasSudocode,
+              hasBmad,
             };
           })
       );

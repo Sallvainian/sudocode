@@ -47,6 +47,9 @@ export function useProjectRoutes() {
       workflows: () => buildPath('/workflows'),
       workflow: (id: string) => buildPath(`/workflows/${id}`),
       worktrees: () => buildPath('/worktrees'),
+      bmad: () => buildPath('/bmad'),
+      bmadPipeline: () => buildPath('/bmad/pipeline'),
+      bmadSprint: () => buildPath('/bmad/sprint'),
     }),
     [buildPath]
   )
@@ -86,6 +89,9 @@ export function useProjectRoutes() {
       workflow: (id: string, options?: { replace?: boolean }) =>
         navigate(paths.workflow(id), options),
       worktrees: (options?: { replace?: boolean }) => navigate(paths.worktrees(), options),
+      bmad: (options?: { replace?: boolean }) => navigate(paths.bmad(), options),
+      bmadPipeline: (options?: { replace?: boolean }) => navigate(paths.bmadPipeline(), options),
+      bmadSprint: (options?: { replace?: boolean }) => navigate(paths.bmadSprint(), options),
     }),
     [navigate, paths]
   )

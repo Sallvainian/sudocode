@@ -21,6 +21,9 @@ import ProjectsPage from '@/pages/ProjectsPage'
 import ExecutionsPage from '@/pages/ExecutionsPage'
 import WorkflowsPage from '@/pages/WorkflowsPage'
 import WorkflowDetailPage from '@/pages/WorkflowDetailPage'
+import BmadDashboardPage from '@/pages/BmadDashboardPage'
+import BmadPipelinePage from '@/pages/BmadPipelinePage'
+import BmadSprintPage from '@/pages/BmadSprintPage'
 import { cleanExpiredDrafts } from '@/hooks/usePersistedDraft'
 
 // Prune stale draft entries from localStorage on startup
@@ -122,6 +125,31 @@ function App() {
                         element={
                           <ProtectedRoute>
                             <ExecutionDetailPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      {/* BMAD routes */}
+                      <Route
+                        path="bmad"
+                        element={
+                          <ProtectedRoute>
+                            <BmadDashboardPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="bmad/pipeline"
+                        element={
+                          <ProtectedRoute>
+                            <BmadPipelinePage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="bmad/sprint"
+                        element={
+                          <ProtectedRoute>
+                            <BmadSprintPage />
                           </ProtectedRoute>
                         }
                       />

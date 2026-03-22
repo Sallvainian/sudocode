@@ -25,6 +25,7 @@ import { createVersionRouter } from "./routes/version.js";
 import { createUpdateRouter, setServerInstance } from "./routes/update.js";
 import { createWorkflowsRouter } from "./routes/workflows.js";
 import { createVoiceRouter } from "./routes/voice.js";
+import { createBmadRouter } from "./routes/bmad.js";
 import { ProjectRegistry } from "./services/project-registry.js";
 import { ProjectManager } from "./services/project-manager.js";
 import { requireProject } from "./middleware/project-context.js";
@@ -163,6 +164,9 @@ async function main() {
 
   // Voice endpoint - requires project context for config
   app.use("/api/voice", requireProject(projectManager), createVoiceRouter());
+
+  // BMAD endpoint - requires project context
+  app.use("/api/bmad", requireProject(projectManager), createBmadRouter());
 
   // Project status endpoint - returns ready issues, active executions, running workflows
   app.get(

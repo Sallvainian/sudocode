@@ -8,6 +8,8 @@ import type { IWorkflowEngine } from "../workflow/workflow-engine.js";
 import type { WorkflowBroadcastService } from "./workflow-broadcast-service.js";
 import type { WorkflowEngineType } from "@sudocode-ai/types/workflows";
 import type { IntegrationSyncService } from "./integration-sync-service.js";
+import { existsSync } from "fs";
+import * as path from "path";
 
 /**
  * ProjectContext encapsulates all services and resources for a single open project.
@@ -164,6 +166,10 @@ export class ProjectContext {
    * Get summary information about this project context
    */
   getSummary() {
+    const bmadDir = path.join(this.path, "_bmad");
+    const bmadConfigDir = path.join(bmadDir, "_config");
+    const bmadOutputDir = path.join(this.path, "_bmad-output");
+
     return {
       id: this.id,
       path: this.path,
@@ -171,6 +177,9 @@ export class ProjectContext {
       openedAt: this.openedAt,
       hasWatcher: this.watcher !== null,
       hasActiveExecutions: this.hasActiveExecutions(),
+      hasBmad: existsSync(bmadDir),
+      hasBmadConfig: existsSync(bmadConfigDir),
+      hasBmadOutput: existsSync(bmadOutputDir),
     };
   }
 
