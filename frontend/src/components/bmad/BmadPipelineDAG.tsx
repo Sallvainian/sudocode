@@ -302,13 +302,13 @@ export function BmadPipelineDAG({
   const { actualTheme } = useTheme()
   const isDark = actualTheme === 'dark'
 
-  const { initialNodes, initialEdges } = useMemo(() => {
-    const { nodes, edges } = buildDAGElements(steps, selectedStepId, onStepSelect)
-    return layoutElements(nodes, edges)
+  const initial = useMemo(() => {
+    const { nodes: rawNodes, edges: rawEdges } = buildDAGElements(steps, selectedStepId, onStepSelect)
+    return layoutElements(rawNodes, rawEdges)
   }, [steps, selectedStepId, onStepSelect])
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
+  const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes)
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges)
 
   useEffect(() => {
     const { nodes: newNodes, edges: newEdges } = buildDAGElements(

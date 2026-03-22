@@ -243,6 +243,136 @@ export interface ResumeWorkflowParams {
 }
 
 
+// BMAD
+export interface BmadStatusResult {
+  installed: boolean;
+  hasConfig: boolean;
+  hasOutput: boolean;
+  currentPhase: string | null;
+  artifactSummary: {
+    total: number;
+    existing: number;
+    types: string[];
+  };
+}
+
+export interface BmadArtifactsResult {
+  artifacts: Array<{
+    type: string;
+    filename: string;
+    exists: boolean;
+  }>;
+  currentPhase: string;
+}
+
+export interface BmadNextStepResult {
+  skill: string;
+  persona: string;
+  description: string;
+  phase: string;
+}
+
+export interface BmadRunSkillParams {
+  skill: string;
+  issue_id?: string;
+  persona?: string;
+  agent_type?: "claude-code" | "codex" | "copilot" | "cursor";
+}
+
+/**
+ * Map BMAD skills to their default persona.
+ */
+const SKILL_PERSONA_MAP: Record<string, string> = {
+  "create-product-brief": "analyst",
+  "domain-research": "analyst",
+  "market-research": "analyst",
+  "create-prd": "pm",
+  "edit-prd": "pm",
+  "validate-prd": "pm",
+  "create-architecture": "architect",
+  "create-ux-design": "ux-designer",
+  "create-epics-and-stories": "sm",
+  "sprint-planning": "sm",
+  "create-story": "sm",
+  "dev-story": "dev",
+  "quick-dev": "quick-flow-solo-dev",
+  "code-review": "dev",
+  "check-implementation-readiness": "pm",
+};
+
+/**
+ * Determine the next recommended BMAD step based on artifact state.
+ */
+function computeNextStep(
+  status: BmadStatusResult,
+  artifacts: BmadArtifactsResult,
+): BmadNextStepResult {
+  const existingTypes = new Set(
+    artifacts.artifacts.filter((a) => a.exists).map((a) => a.type),
+  );
+
+  if (!existingTypes.has("product-brief") && !existingTypes.has("project-context")) {
+    return {
+      skill: "create-product-brief",
+      persona: "analyst",
+      description: "Start by creating a product brief to capture the project vision and goals",
+      phase: "analysis",
+    };
+  }
+
+  if (!existingTypes.has("prd")) {
+    return {
+      skill: "create-prd",
+      persona: "pm",
+      description: "Create a Product Requirements Document from the product brief",
+      phase: "planning",
+    };
+  }
+
+  if (!existingTypes.has("architecture")) {
+    return {
+      skill: "create-architecture",
+      persona: "architect",
+      description: "Design the system architecture based on the PRD",
+      phase: "planning",
+    };
+  }
+
+  if (!existingTypes.has("ux-spec")) {
+    return {
+      skill: "create-ux-design",
+      persona: "ux-designer",
+      description: "Create UX specifications and design patterns",
+      phase: "solutioning",
+    };
+  }
+
+  if (!existingTypes.has("epic")) {
+    return {
+      skill: "create-epics-and-stories",
+      persona: "sm",
+      description: "Break down requirements into epics and user stories",
+      phase: "solutioning",
+    };
+  }
+
+  if (!existingTypes.has("story")) {
+    return {
+      skill: "create-story",
+      persona: "sm",
+      description: "Create detailed story files for implementation",
+      phase: "solutioning",
+    };
+  }
+
+  return {
+    skill: "dev-story",
+    persona: "dev",
+    description: "All planning artifacts are complete. Ready to implement stories.",
+    phase: "implementation",
+  };
+}
+
 // =============================================================================
 // API Client
 // =============================================================================
@@ -621,4 +751,44 @@ export class SudocodeAPIClient {
     return this.request("POST", `/api/workflows/${params.workflow_id}/resume`);
   }
 
+  // ===========================================================================
+  // BMAD Methods
+  // ===========================================================================
+
+  /**
+   * Get BMAD status (phase, artifacts, progress).
+   */
+  async getBmadStatus(): Promise<BmadStatusResult> {
+    return this.request<BmadStatusResult>("GET", "/api/bmad/status");
+  }
+
+  /**
+   * Get next recommended BMAD step.
+   */
+  async getBmadNextStep(): Promise<BmadNextStepResult> {
+    // Fetch status and artifacts, then compute next step
+    const status = await this.request<BmadStatusResult>("GET", "/api/bmad/status");
+    const artifacts = await this.request<BmadArtifactsResult>("GET", "/api/bmad/artifacts");
+    return computeNextStep(status, artifacts);
+  }
+
+  /**
+   * Run a BMAD skill by creating an execution.
+   */
+  async runBmadSkill(params: BmadRunSkillParams): Promise<unknown> {
+    const persona = params.persona || SKILL_PERSONA_MAP[params.skill] || "dev";
+    const prompt = `Run BMAD skill: ${params.skill} (as ${persona} persona)`;
+
+    if (params.issue_id) {
+      return this.request("POST", `/api/issues/${params.issue_id}/executions`, {
+        agent_type: params.agent_type || "claude-code",
+        prompt,
+      });
+    }
+
+    return this.request("POST", "/api/executions", {
+      agent_type: params.agent_type || "claude-code",
+      prompt,
+    });
+  }
 }

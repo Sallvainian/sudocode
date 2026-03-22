@@ -756,6 +756,67 @@ const VOICE_TOOLS: ToolDefinition[] = [
 ];
 
 // =============================================================================
+// BMAD Tools
+// =============================================================================
+
+const BMAD_TOOLS: ToolDefinition[] = [
+  {
+    name: "bmad_status",
+    scope: "bmad",
+    description:
+      "Get BMAD Method status: current phase, artifact completion, and progress. " +
+      "Use this to understand where the project is in the BMAD workflow.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+  },
+  {
+    name: "bmad_next_step",
+    scope: "bmad",
+    description:
+      "Get the next recommended BMAD workflow step based on current artifact state. " +
+      "Returns the skill name, persona, and description for what should happen next.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+  },
+  {
+    name: "bmad_run_skill",
+    scope: "bmad",
+    description:
+      "Start a BMAD workflow execution with the appropriate persona. " +
+      "Creates an execution via the server API.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        skill: {
+          type: "string",
+          description:
+            "BMAD skill to run (e.g., 'create-prd', 'create-architecture', 'create-epics-and-stories')",
+        },
+        issue_id: {
+          type: "string",
+          description: "Optional issue ID to associate with the execution",
+        },
+        persona: {
+          type: "string",
+          description:
+            "BMAD persona to use (e.g., 'pm', 'architect', 'sm'). Auto-detected from skill if omitted.",
+        },
+        agent_type: {
+          type: "string",
+          enum: ["claude-code", "codex", "copilot", "cursor"],
+          description: "Agent type to use (default: claude-code)",
+        },
+      },
+      required: ["skill"],
+    },
+  },
+];
+
+// =============================================================================
 // Tool Registry
 // =============================================================================
 
@@ -771,6 +832,7 @@ export const ALL_TOOLS: ToolDefinition[] = [
   ...WORKFLOW_READ_TOOLS,
   ...WORKFLOW_WRITE_TOOLS,
   ...VOICE_TOOLS,
+  ...BMAD_TOOLS,
 ];
 
 /**

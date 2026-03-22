@@ -27,7 +27,8 @@ export type Scope =
   | "workflows"
   | "workflows:read"
   | "workflows:write"
-  | "voice";
+  | "voice"
+  | "bmad";
 
 /**
  * Meta-scopes that expand to multiple scopes.
@@ -57,6 +58,7 @@ export const ALL_SCOPES: Scope[] = [
   "workflows:read",
   "workflows:write",
   "voice",
+  "bmad",
 ];
 
 /**
@@ -72,6 +74,7 @@ export const SERVER_REQUIRED_SCOPES: Scope[] = [
   "workflows:read",
   "workflows:write",
   "voice",
+  "bmad",
 ];
 
 /**
@@ -90,6 +93,7 @@ export const META_SCOPE_EXPANSIONS: Record<MetaScope, Scope[]> = {
     "executions",
     "inspection",
     "workflows",
+    "bmad",
   ],
 };
 
@@ -148,6 +152,9 @@ export const SCOPE_TOOLS: Record<Scope, string[]> = {
 
   // Voice scope - for explicit agent narration
   voice: ["speak"],
+
+  // BMAD scope - BMAD Method integration tools
+  bmad: ["bmad_status", "bmad_next_step", "bmad_run_skill"],
 };
 
 // =============================================================================

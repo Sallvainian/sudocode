@@ -13,6 +13,22 @@ import {
   BMAD_PHASES,
   type GenerateWorkflowOptions,
 } from "../services/bmad-workflow-service.js";
+import {
+  applyGateResult,
+  resolveGate,
+  type GateType,
+  type GateResult,
+  type GateItem,
+} from "../services/bmad-gate-service.js";
+import {
+  createBmadExecution,
+} from "../services/bmad-execution-service.js";
+import { BMAD_PERSONAS } from "@sudocode-ai/integration-bmad";
+import { agentRegistryService } from "../services/agent-registry.js";
+import {
+  AgentNotFoundError,
+  AgentNotImplementedError,
+} from "../errors/agent-errors.js";
 
 // =============================================================================
 // BMAD Agent Persona Definitions (static)
@@ -456,6 +472,223 @@ export function createBmadRouter(): Router {
       res.status(500).json({
         success: false,
         error: `Failed to generate BMAD workflow: ${error instanceof Error ? error.message : String(error)}`,
+      });
+    }
+  });
+
+  /**
+   * POST /api/bmad/gate
+   *
+   * Apply a BMAD quality gate result. Creates feedback entries and
+   * optionally blocks dependent issues on failure.
+   *
+   * Body: {
+   *   gateType: "readiness" | "story-validation" | "code-review",
+   *   result: "pass" | "concerns" | "fail",
+   *   items: Array<{ description, severity?, specId?, issueId?, anchor? }>
+   * }
+   */
+  router.post("/gate", (req: Request, res: Response) => {
+    try {
+      const db = req.project!.db;
+      const { gateType, result, items } = req.body as {
+        gateType: GateType;
+        result: GateResult;
+        items: GateItem[];
+      };
+
+      if (!gateType || !result || !items) {
+        res.status(400).json({
+          success: false,
+          error: "Missing required fields: gateType, result, items",
+        });
+        return;
+      }
+
+      const validGateTypes: GateType[] = ["readiness", "story-validation", "code-review"];
+      if (!validGateTypes.includes(gateType)) {
+        res.status(400).json({
+          success: false,
+          error: `Invalid gateType: ${gateType}. Must be one of: ${validGateTypes.join(", ")}`,
+        });
+        return;
+      }
+
+      const validResults: GateResult[] = ["pass", "concerns", "fail"];
+      if (!validResults.includes(result)) {
+        res.status(400).json({
+          success: false,
+          error: `Invalid result: ${result}. Must be one of: ${validResults.join(", ")}`,
+        });
+        return;
+      }
+
+      const output = applyGateResult(db, { gateType, result, items });
+
+      res.status(200).json({
+        success: true,
+        data: output,
+      });
+    } catch (error) {
+      console.error("[bmad] Failed to apply gate result:", error);
+      res.status(500).json({
+        success: false,
+        error: `Failed to apply gate result: ${error instanceof Error ? error.message : String(error)}`,
+      });
+    }
+  });
+
+  /**
+   * POST /api/bmad/gate/resolve
+   *
+   * Resolve a quality gate: dismiss feedback, remove blocks, unblock issues.
+   *
+   * Body: { gateType: "readiness" | "story-validation" | "code-review" }
+   */
+  router.post("/gate/resolve", (req: Request, res: Response) => {
+    try {
+      const db = req.project!.db;
+      const { gateType } = req.body as { gateType: GateType };
+
+      if (!gateType) {
+        res.status(400).json({
+          success: false,
+          error: "Missing required field: gateType",
+        });
+        return;
+      }
+
+      const output = resolveGate(db, gateType);
+
+      res.status(200).json({
+        success: true,
+        data: output,
+      });
+    } catch (error) {
+      console.error("[bmad] Failed to resolve gate:", error);
+      res.status(500).json({
+        success: false,
+        error: `Failed to resolve gate: ${error instanceof Error ? error.message : String(error)}`,
+      });
+    }
+  });
+
+  /**
+   * POST /api/bmad/execute
+   *
+   * Create an execution with a BMAD persona's system prompt injected
+   * into the agent configuration.
+   *
+   * Body: {
+   *   issueId: string,        // Issue to execute against
+   *   persona: string,        // BMAD persona ID (e.g., "dev", "qa")
+   *   skill: string,          // BMAD skill being invoked (e.g., "bmad-dev-story")
+   *   prompt?: string,        // Optional prompt (defaults to issue title)
+   *   agentType?: AgentType,  // Agent type (defaults to "claude-code")
+   *   model?: string,         // Model override
+   *   mode?: "worktree" | "local",
+   *   baseBranch?: string,
+   * }
+   */
+  router.post("/execute", async (req: Request, res: Response) => {
+    try {
+      const {
+        issueId,
+        persona,
+        skill,
+        prompt,
+        agentType,
+        model,
+        mode,
+        baseBranch,
+      } = req.body;
+
+      // Validate required fields
+      if (!issueId || !persona || !skill) {
+        res.status(400).json({
+          success: false,
+          error: "Missing required fields: issueId, persona, skill",
+        });
+        return;
+      }
+
+      // Validate persona
+      if (!BMAD_PERSONAS[persona]) {
+        const valid = Object.keys(BMAD_PERSONAS).join(", ");
+        res.status(400).json({
+          success: false,
+          error: `Unknown BMAD persona "${persona}". Valid personas: ${valid}`,
+        });
+        return;
+      }
+
+      // Validate agentType if provided
+      if (agentType) {
+        if (!agentRegistryService.hasAgent(agentType)) {
+          const availableAgents = agentRegistryService
+            .getAvailableAgents()
+            .map((a) => a.name);
+          throw new AgentNotFoundError(agentType, availableAgents);
+        }
+        if (!agentRegistryService.isAgentImplemented(agentType)) {
+          throw new AgentNotImplementedError(agentType);
+        }
+      }
+
+      // Ensure execution service is available
+      if (!req.project!.executionService) {
+        res.status(500).json({
+          success: false,
+          error: "Execution service not available",
+        });
+        return;
+      }
+
+      // Default prompt to a BMAD-flavored message if not provided
+      const resolvedPrompt =
+        prompt ||
+        `Execute BMAD skill "${skill}" as ${BMAD_PERSONAS[persona].name} (${BMAD_PERSONAS[persona].role}) on this issue.`;
+
+      const execution = await createBmadExecution(
+        req.project!.executionService,
+        req.project!.db,
+        issueId,
+        persona,
+        skill,
+        resolvedPrompt,
+        agentType || "claude-code",
+        { mode, model, baseBranch },
+      );
+
+      res.status(201).json({
+        success: true,
+        data: execution,
+      });
+    } catch (error) {
+      console.error("[bmad] Failed to create BMAD execution:", error);
+
+      if (error instanceof AgentNotFoundError) {
+        res.status(400).json({
+          success: false,
+          error: error.message,
+          code: error.code,
+          details: error.details,
+        });
+        return;
+      }
+
+      if (error instanceof AgentNotImplementedError) {
+        res.status(501).json({
+          success: false,
+          error: error.message,
+          code: error.code,
+        });
+        return;
+      }
+
+      res.status(500).json({
+        success: false,
+        error: `Failed to create BMAD execution: ${error instanceof Error ? error.message : String(error)}`,
       });
     }
   });

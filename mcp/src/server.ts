@@ -366,6 +366,14 @@ sudocode is a git-native spec and issue management system designed for AI-assist
       case "speak":
         return { success: true, message: "Narration queued" };
 
+      // BMAD
+      case "bmad_status":
+        return this.apiClient.getBmadStatus();
+      case "bmad_next_step":
+        return this.apiClient.getBmadNextStep();
+      case "bmad_run_skill":
+        return this.apiClient.runBmadSkill(args as any);
+
       default:
         throw new Error(`Unknown API tool: ${name}`);
     }

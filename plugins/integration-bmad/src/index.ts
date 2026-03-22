@@ -110,5 +110,14 @@ export {
   updateAllTasksCompletion,
 } from "./writer/index.js";
 
+// Persona prompts
+export {
+  BMAD_PERSONAS,
+  getPersonaSystemPrompt,
+  getPersonaConfig,
+  type BmadPersona,
+  type BmadPersonaSkill,
+} from "./persona-prompts.js";
+
 // Plugin (default export)
 export { default } from "./plugin.js";
