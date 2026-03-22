@@ -10,5 +10,7 @@ dist/
 .cursor
 __pycache__/
 _bmad/
+_bmad-output/
+review/
 .agents/
 .claude/skills/
